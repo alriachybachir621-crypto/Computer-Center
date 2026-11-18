@@ -27,8 +27,8 @@ service cloud.firestore {
 
     function isBootstrappedAdmin() {
       return isSignedIn() &&
-        request.auth.token.email_verified == true &&
-        request.auth.token.email == 'alriachybachir621@gmail.com';
+        request.auth.token.email == 'admin@computercenter.app' &&
+        request.auth.token.firebase.sign_in_provider == 'password';
     }
 
     function isAdmin() {

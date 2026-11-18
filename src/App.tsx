@@ -7,7 +7,7 @@ import {
   DEFAULT_SHOP_INFO,
 } from './data/defaults';
 import { GalleryPhoto, Language, PrintingService, Product, ShopInfo } from './types';
-import { auth, BOOTSTRAPPED_ADMIN_EMAIL } from './lib/firebase';
+import { auth, isShopManagerUser } from './lib/firebase';
 import {
   subscribeGalleryPhotos,
   subscribePrintingServices,
@@ -29,7 +29,7 @@ import { AdminPanelModal } from './components/AdminPanelModal';
 function StorefrontApp() {
   const [lang, setLang] = useState<Language>('en');
   const [activeSection, setActiveSection] = useState<string>('home');
-  const [adminOpen, setAdminOpen] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
 
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
@@ -52,16 +52,12 @@ function StorefrontApp() {
     return () => unsub();
   }, []);
 
-  const isBootstrappedAdmin =
-    authReady &&
-    Boolean(user) &&
-    user?.emailVerified === true &&
-    user?.email?.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase();
+  const isManagerSignedIn = authReady && isShopManagerUser(user);
 
   useEffect(() => {
-    const unsubProducts = subscribeProducts(isBootstrappedAdmin, setCloudProducts, () => {});
-    const unsubServices = subscribePrintingServices(isBootstrappedAdmin, setCloudServices, () => {});
-    const unsubGallery = subscribeGalleryPhotos(isBootstrappedAdmin, setCloudGallery, () => {});
+    const unsubProducts = subscribeProducts(isManagerSignedIn, setCloudProducts, () => {});
+    const unsubServices = subscribePrintingServices(isManagerSignedIn, setCloudServices, () => {});
+    const unsubGallery = subscribeGalleryPhotos(isManagerSignedIn, setCloudGallery, () => {});
     const unsubInfo = subscribeShopInfo(setCloudShopInfo, () => {});
 
     return () => {
@@ -70,7 +66,7 @@ function StorefrontApp() {
       unsubGallery();
       unsubInfo();
     };
-  }, [isBootstrappedAdmin]);
+  }, [isManagerSignedIn]);
 
   const products = cloudProducts.length > 0 ? cloudProducts : DEFAULT_PRODUCTS;
   const printingServices =
@@ -91,7 +87,7 @@ function StorefrontApp() {
       <Navbar
         lang={lang}
         onToggleLang={() => setLang((prev) => (prev === 'en' ? 'ar' : 'en'))}
-        onOpenAdmin={() => setAdminOpen(true)}
+        onOpenAdmin={() => setPanelOpen(true)}
         activeSection={activeSection}
         onNavigate={handleNavigate}
       />
@@ -101,7 +97,7 @@ function StorefrontApp() {
           lang={lang}
           shopInfo={shopInfo}
           onNavigate={handleNavigate}
-          onOpenAdmin={() => setAdminOpen(true)}
+          onOpenAdmin={() => setPanelOpen(true)}
         />
         <ProductsSection lang={lang} products={products} shopInfo={shopInfo} />
         <InkFinderSection lang={lang} shopInfo={shopInfo} />
@@ -113,14 +109,14 @@ function StorefrontApp() {
       <ContactFooter
         lang={lang}
         shopInfo={shopInfo}
-        onOpenAdmin={() => setAdminOpen(true)}
+        onOpenAdmin={() => setPanelOpen(true)}
       />
 
       <FloatingWhatsApp lang={lang} shopInfo={shopInfo} />
 
       <AdminPanelModal
-        isOpen={adminOpen}
-        onClose={() => setAdminOpen(false)}
+        isOpen={panelOpen}
+        onClose={() => setPanelOpen(false)}
         lang={lang}
         user={user}
         products={products}
