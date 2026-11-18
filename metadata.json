@@ -1,0 +1,6 @@
+{
+  "name": "Computer Center — Haouch El Oumaraa",
+  "description": "Computers, laptops, printers, ink cartridges, commercial printing, OMT & Western Union, and internet subscriptions in Haouch El Oumaraa, Zahle, Lebanon.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

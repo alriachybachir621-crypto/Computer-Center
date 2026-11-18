@@ -1,0 +1,310 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Hardware, printer, ink cartridge, phone, or gaming item sold in Computer Center.",
+      "type": "object",
+      "properties": {
+        "nameEn": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 140,
+          "description": "English product name"
+        },
+        "nameAr": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 140,
+          "description": "Arabic product name"
+        },
+        "category": {
+          "type": "string",
+          "enum": [
+            "Laptops",
+            "Desktops",
+            "Printers",
+            "Ink & Toner",
+            "Phones & iPads",
+            "Accessories",
+            "Gaming"
+          ],
+          "description": "Product category"
+        },
+        "priceUsd": {
+          "type": "number",
+          "description": "Price in US Dollars"
+        },
+        "stockStatus": {
+          "type": "string",
+          "enum": ["available", "on_request"],
+          "description": "Current shop availability status"
+        },
+        "imageUrl": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048,
+          "description": "Product image URL or asset path"
+        },
+        "descriptionEn": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Short English specs or note"
+        },
+        "descriptionAr": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Short Arabic specs or note"
+        },
+        "isVisible": {
+          "type": "boolean",
+          "description": "Whether the product is publicly listed"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation server timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update server timestamp"
+        }
+      },
+      "required": [
+        "nameEn",
+        "nameAr",
+        "category",
+        "priceUsd",
+        "stockStatus",
+        "imageUrl",
+        "isVisible",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "PrintingService": {
+      "title": "PrintingService",
+      "description": "Commercial printing, plotting, copying, and scanning service with starting USD rate.",
+      "type": "object",
+      "properties": {
+        "nameEn": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "nameAr": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "unitEn": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "unitAr": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 60
+        },
+        "startingPriceUsd": {
+          "type": "number"
+        },
+        "descriptionEn": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "descriptionAr": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "sortOrder": {
+          "type": "number"
+        },
+        "isVisible": {
+          "type": "boolean"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "nameEn",
+        "nameAr",
+        "unitEn",
+        "unitAr",
+        "startingPriceUsd",
+        "sortOrder",
+        "isVisible",
+        "updatedAt"
+      ]
+    },
+    "GalleryPhoto": {
+      "title": "GalleryPhoto",
+      "description": "Shop showroom or printing equipment photograph.",
+      "type": "object",
+      "properties": {
+        "titleEn": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "titleAr": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "imageUrl": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2048
+        },
+        "sortOrder": {
+          "type": "number"
+        },
+        "isVisible": {
+          "type": "boolean"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "titleEn",
+        "titleAr",
+        "imageUrl",
+        "sortOrder",
+        "isVisible",
+        "createdAt"
+      ]
+    },
+    "ShopInfo": {
+      "title": "ShopInfo",
+      "description": "Public business contact details, hours, and service notes for Computer Center.",
+      "type": "object",
+      "properties": {
+        "whatsappNumber": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 32
+        },
+        "landlinePhone": {
+          "type": "string",
+          "minLength": 5,
+          "maxLength": 32
+        },
+        "hoursEn": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "hoursAr": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "addressEn": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "addressAr": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "ispProvidersEn": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "ispProvidersAr": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "transferNoteEn": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "transferNoteAr": {
+          "type": "string",
+          "maxLength": 400
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "whatsappNumber",
+        "landlinePhone",
+        "hoursEn",
+        "hoursAr",
+        "addressEn",
+        "addressAr",
+        "updatedAt"
+      ]
+    },
+    "AdminPinSetting": {
+      "title": "AdminPinSetting",
+      "description": "Protected 4-digit shop admin unlock code.",
+      "type": "object",
+      "properties": {
+        "pinCode": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 4,
+          "pattern": "^[0-9]{4}$"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["pinCode", "updatedAt"]
+    },
+    "AdminUser": {
+      "title": "AdminUser",
+      "description": "Authorized admin UID registry entry.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin"]
+        }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Catalog products displayed in the Products page and managed by admin."
+    },
+    "/printing_services/{serviceId}": {
+      "schema": { "$ref": "#/entities/PrintingService" },
+      "description": "Printing services and starting rates managed by admin."
+    },
+    "/gallery_photos/{photoId}": {
+      "schema": { "$ref": "#/entities/GalleryPhoto" },
+      "description": "Gallery photographs of the shop and printing equipment."
+    },
+    "/shop_info/{docId}": {
+      "schema": { "$ref": "#/entities/ShopInfo" },
+      "description": "Single public shop_info/main document containing WhatsApp, landline, hours, address, and service notes."
+    },
+    "/admin_settings/{settingId}": {
+      "schema": { "$ref": "#/entities/AdminPinSetting" },
+      "description": "Admin-only configuration including the 4-digit PIN code."
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminUser" },
+      "description": "Read-only registry of authorized admin UIDs."
+    }
+  }
+}

@@ -1,0 +1,254 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Hardened Primitives ---
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isBootstrappedAdmin() {
+      return isSignedIn() &&
+        request.auth.token.email_verified == true &&
+        request.auth.token.email == 'alriachybachir621@gmail.com';
+    }
+
+    function isAdmin() {
+      return isBootstrappedAdmin() || (
+        isSignedIn() &&
+        request.auth.token.email_verified == true &&
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // --- Validation Blueprints ---
+    function isValidProductCategory(cat) {
+      return cat in [
+        'Laptops',
+        'Desktops',
+        'Printers',
+        'Ink & Toner',
+        'Phones & iPads',
+        'Accessories',
+        'Gaming'
+      ];
+    }
+
+    function isValidProductFields(data) {
+      return data.nameEn is string && data.nameEn.size() >= 1 && data.nameEn.size() <= 140 &&
+        data.nameAr is string && data.nameAr.size() >= 1 && data.nameAr.size() <= 140 &&
+        data.category is string && isValidProductCategory(data.category) &&
+        data.priceUsd is number && data.priceUsd >= 0 && data.priceUsd <= 100000 &&
+        data.stockStatus in ['available', 'on_request'] &&
+        data.imageUrl is string && data.imageUrl.size() >= 1 && data.imageUrl.size() <= 2048 &&
+        (!('descriptionEn' in data) || (data.descriptionEn is string && data.descriptionEn.size() <= 500)) &&
+        (!('descriptionAr' in data) || (data.descriptionAr is string && data.descriptionAr.size() <= 500)) &&
+        data.isVisible is bool &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidProductCreate(data) {
+      return data.keys().hasAll([
+          'nameEn', 'nameAr', 'category', 'priceUsd',
+          'stockStatus', 'imageUrl', 'isVisible', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'nameEn', 'nameAr', 'category', 'priceUsd', 'stockStatus',
+          'imageUrl', 'descriptionEn', 'descriptionAr', 'isVisible',
+          'createdAt', 'updatedAt'
+        ]) &&
+        isValidProductFields(data) &&
+        data.createdAt == request.time &&
+        data.updatedAt == request.time;
+    }
+
+    function isValidProductUpdate(newData, oldData) {
+      return newData.keys().hasOnly([
+          'nameEn', 'nameAr', 'category', 'priceUsd', 'stockStatus',
+          'imageUrl', 'descriptionEn', 'descriptionAr', 'isVisible',
+          'createdAt', 'updatedAt'
+        ]) &&
+        isValidProductFields(newData) &&
+        newData.createdAt == oldData.createdAt &&
+        newData.updatedAt == request.time;
+    }
+
+    function isValidPrintingServiceFields(data) {
+      return data.nameEn is string && data.nameEn.size() >= 1 && data.nameEn.size() <= 120 &&
+        data.nameAr is string && data.nameAr.size() >= 1 && data.nameAr.size() <= 120 &&
+        data.unitEn is string && data.unitEn.size() >= 1 && data.unitEn.size() <= 60 &&
+        data.unitAr is string && data.unitAr.size() >= 1 && data.unitAr.size() <= 60 &&
+        data.startingPriceUsd is number && data.startingPriceUsd >= 0 && data.startingPriceUsd <= 10000 &&
+        (!('descriptionEn' in data) || (data.descriptionEn is string && data.descriptionEn.size() <= 400)) &&
+        (!('descriptionAr' in data) || (data.descriptionAr is string && data.descriptionAr.size() <= 400)) &&
+        data.sortOrder is number && data.sortOrder >= 0 && data.sortOrder <= 1000 &&
+        data.isVisible is bool &&
+        data.updatedAt is timestamp;
+    }
+
+    function isValidPrintingServiceCreate(data) {
+      return data.keys().hasAll([
+          'nameEn', 'nameAr', 'unitEn', 'unitAr',
+          'startingPriceUsd', 'sortOrder', 'isVisible', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'nameEn', 'nameAr', 'unitEn', 'unitAr', 'startingPriceUsd',
+          'descriptionEn', 'descriptionAr', 'sortOrder', 'isVisible', 'updatedAt'
+        ]) &&
+        isValidPrintingServiceFields(data) &&
+        data.updatedAt == request.time;
+    }
+
+    function isValidPrintingServiceUpdate(data) {
+      return data.keys().hasOnly([
+          'nameEn', 'nameAr', 'unitEn', 'unitAr', 'startingPriceUsd',
+          'descriptionEn', 'descriptionAr', 'sortOrder', 'isVisible', 'updatedAt'
+        ]) &&
+        isValidPrintingServiceFields(data) &&
+        data.updatedAt == request.time;
+    }
+
+    function isValidGalleryPhotoFields(data) {
+      return data.titleEn is string && data.titleEn.size() >= 1 && data.titleEn.size() <= 120 &&
+        data.titleAr is string && data.titleAr.size() >= 1 && data.titleAr.size() <= 120 &&
+        data.imageUrl is string && data.imageUrl.size() >= 1 && data.imageUrl.size() <= 2048 &&
+        data.sortOrder is number && data.sortOrder >= 0 && data.sortOrder <= 1000 &&
+        data.isVisible is bool &&
+        data.createdAt is timestamp;
+    }
+
+    function isValidGalleryPhotoCreate(data) {
+      return data.keys().hasAll(['titleEn', 'titleAr', 'imageUrl', 'sortOrder', 'isVisible', 'createdAt']) &&
+        data.keys().hasOnly(['titleEn', 'titleAr', 'imageUrl', 'sortOrder', 'isVisible', 'createdAt']) &&
+        isValidGalleryPhotoFields(data) &&
+        data.createdAt == request.time;
+    }
+
+    function isValidGalleryPhotoUpdate(newData, oldData) {
+      return newData.keys().hasOnly(['titleEn', 'titleAr', 'imageUrl', 'sortOrder', 'isVisible', 'createdAt']) &&
+        isValidGalleryPhotoFields(newData) &&
+        newData.createdAt == oldData.createdAt;
+    }
+
+    function isValidShopInfo(data) {
+      return data.keys().hasAll([
+          'whatsappNumber', 'landlinePhone', 'hoursEn', 'hoursAr',
+          'addressEn', 'addressAr', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'whatsappNumber', 'landlinePhone', 'hoursEn', 'hoursAr',
+          'addressEn', 'addressAr', 'ispProvidersEn', 'ispProvidersAr',
+          'transferNoteEn', 'transferNoteAr', 'updatedAt'
+        ]) &&
+        data.whatsappNumber is string && data.whatsappNumber.size() >= 5 && data.whatsappNumber.size() <= 32 &&
+        data.landlinePhone is string && data.landlinePhone.size() >= 5 && data.landlinePhone.size() <= 32 &&
+        data.hoursEn is string && data.hoursEn.size() >= 1 && data.hoursEn.size() <= 200 &&
+        data.hoursAr is string && data.hoursAr.size() >= 1 && data.hoursAr.size() <= 200 &&
+        data.addressEn is string && data.addressEn.size() >= 1 && data.addressEn.size() <= 240 &&
+        data.addressAr is string && data.addressAr.size() >= 1 && data.addressAr.size() <= 240 &&
+        (!('ispProvidersEn' in data) || (data.ispProvidersEn is string && data.ispProvidersEn.size() <= 400)) &&
+        (!('ispProvidersAr' in data) || (data.ispProvidersAr is string && data.ispProvidersAr.size() <= 400)) &&
+        (!('transferNoteEn' in data) || (data.transferNoteEn is string && data.transferNoteEn.size() <= 400)) &&
+        (!('transferNoteAr' in data) || (data.transferNoteAr is string && data.transferNoteAr.size() <= 400)) &&
+        data.updatedAt == request.time;
+    }
+
+    function isValidAdminPin(data) {
+      return data.keys().hasAll(['pinCode', 'updatedAt']) &&
+        data.keys().hasOnly(['pinCode', 'updatedAt']) &&
+        data.pinCode is string &&
+        data.pinCode.size() == 4 &&
+        data.pinCode.matches('^[0-9]{4}$') &&
+        data.updatedAt == request.time;
+    }
+
+    // --- Collection Rules ---
+
+    match /products/{productId} {
+      allow get: if isValidId(productId) && (existing().isVisible == true || isAdmin());
+      allow list: if resource.data.isVisible == true || isBootstrappedAdmin();
+      allow create: if isAdmin() && isValidId(productId) && isValidProductCreate(incoming());
+      allow update: if isAdmin() && isValidId(productId) && isValidProductUpdate(incoming(), existing()) &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'nameEn', 'nameAr', 'category', 'priceUsd', 'stockStatus',
+          'imageUrl', 'descriptionEn', 'descriptionAr', 'isVisible', 'updatedAt'
+        ]);
+      allow delete: if isAdmin() && isValidId(productId);
+    }
+
+    match /printing_services/{serviceId} {
+      allow get: if isValidId(serviceId) && (existing().isVisible == true || isAdmin());
+      allow list: if resource.data.isVisible == true || isBootstrappedAdmin();
+      allow create: if isAdmin() && isValidId(serviceId) && isValidPrintingServiceCreate(incoming());
+      allow update: if isAdmin() && isValidId(serviceId) && isValidPrintingServiceUpdate(incoming()) &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'nameEn', 'nameAr', 'unitEn', 'unitAr', 'startingPriceUsd',
+          'descriptionEn', 'descriptionAr', 'sortOrder', 'isVisible', 'updatedAt'
+        ]);
+      allow delete: if isAdmin() && isValidId(serviceId);
+    }
+
+    match /gallery_photos/{photoId} {
+      allow get: if isValidId(photoId) && (existing().isVisible == true || isAdmin());
+      allow list: if resource.data.isVisible == true || isBootstrappedAdmin();
+      allow create: if isAdmin() && isValidId(photoId) && isValidGalleryPhotoCreate(incoming());
+      allow update: if isAdmin() && isValidId(photoId) && isValidGalleryPhotoUpdate(incoming(), existing()) &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'titleEn', 'titleAr', 'imageUrl', 'sortOrder', 'isVisible'
+        ]);
+      allow delete: if isAdmin() && isValidId(photoId);
+    }
+
+    match /shop_info/{docId} {
+      allow get: if docId == 'main';
+      allow list: if false;
+      allow create: if isAdmin() && docId == 'main' && isValidShopInfo(incoming());
+      allow update: if isAdmin() && docId == 'main' && isValidShopInfo(incoming()) &&
+        incoming().diff(existing()).affectedKeys().hasOnly([
+          'whatsappNumber', 'landlinePhone', 'hoursEn', 'hoursAr',
+          'addressEn', 'addressAr', 'ispProvidersEn', 'ispProvidersAr',
+          'transferNoteEn', 'transferNoteAr', 'updatedAt'
+        ]);
+      allow delete: if false;
+    }
+
+    match /admin_settings/{settingId} {
+      allow get: if isAdmin() && settingId == 'pin';
+      allow list: if false;
+      allow create: if isAdmin() && settingId == 'pin' && isValidAdminPin(incoming());
+      allow update: if isAdmin() && settingId == 'pin' && isValidAdminPin(incoming()) &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['pinCode', 'updatedAt']);
+      allow delete: if false;
+    }
+
+    match /admins/{adminId} {
+      allow get: if isSignedIn() && isValidId(adminId) && request.auth.uid == adminId;
+      allow list, create, update, delete: if false;
+    }
+
+    // Connection validation probe for startup getDocFromServer check
+    match /test/{docId} {
+      allow get: if docId == 'connection';
+      allow list, write: if false;
+    }
+  }
+}

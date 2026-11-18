@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Plus Jakarta Sans", "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "DM Sans", "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --font-arabic: "Cairo", "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --color-brand-green: #245A2A;
+  --color-brand-mint: #5EE0A0;
+  --color-brand-canvas: #F4F6F5;
+  --color-brand-ink: #1B2B1E;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    font-family: var(--font-sans);
+    background-color: #F4F6F5;
+    color: #1B2B1E;
+  }
+
+  html[dir="rtl"] {
+    font-family: var(--font-arabic);
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+  }
+
+  html[dir="rtl"] h1,
+  html[dir="rtl"] h2,
+  html[dir="rtl"] h3,
+  html[dir="rtl"] h4 {
+    font-family: var(--font-arabic);
+  }
+}
+
+.hero-mint-texture {
+  background-color: #F4F6F5;
+  background-image:
+    radial-gradient(ellipse 80% 70% at 88% 85%, rgba(94, 224, 160, 0.28) 0%, rgba(94, 224, 160, 0.08) 45%, transparent 72%),
+    radial-gradient(ellipse 65% 55% at 12% 18%, rgba(255, 255, 255, 0.95) 0%, rgba(226, 232, 229, 0.45) 60%, transparent 100%),
+    linear-gradient(135deg, #ECEFEF 0%, #F8FAF9 52%, #E5F8EE 100%);
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
